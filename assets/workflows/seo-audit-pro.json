@@ -1,0 +1,1048 @@
+{
+  "name": "[CJ] SEO Audit Pro",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "triggerAtDayOfMonth": 3,
+              "triggerAtHour": 3
+            }
+          ]
+        }
+      },
+      "id": "3dcb89be-59b3-4372-a006-0d4288df0de0",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -80,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "d9762e85-247d-473f-89f5-ced0daa32503",
+      "name": "Buscar HTML",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1008,
+        704
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const html = $input.item.json.data || '';\nconst url = ($input.item.json.url || '').replace(/\\?.*/,'');\n\nfunction extract(re, h, g=1){ const m=h.match(re); return m?(m[g]||'').replace(/<[^>]+>/g,'').trim():'' }\nfunction countTag(tag,h){ return (h.match(new RegExp(`<${tag}[\\\\s>]`,'gi'))||[]).length }\nfunction firstText(tag,h){ const m=h.match(new RegExp(`<${tag}[^>]*>([\\\\s\\\\S]{0,300}?)<\\\\/${tag}>`,'i')); return m?m[1].replace(/<[^>]+>/g,'').trim().substring(0,160):'' }\n\nconst title = extract(/<title[^>]*>([^<]{1,200})<\\/title>/i, html);\nconst desc  = extract(/<meta[^>]+name=[\"']description[\"'][^>]+content=[\"']([^\"']{1,320})[\"']/i,html) ||\n              extract(/<meta[^>]+content=[\"']([^\"']{1,320})[\"'][^>]+name=[\"']description[\"']/i,html);\n\nconst h1Text = firstText('h1',html);\nconst h1Count = countTag('h1',html);\nconst h2Count = countTag('h2',html);\nconst h3Count = countTag('h3',html);\nconst h4Count = countTag('h4',html);\nconst h5Count = countTag('h5',html);\n\nconst canonical = extract(/<link[^>]+rel=[\"']canonical[\"'][^>]+href=[\"']([^\"']+)[\"']/i,html);\nconst robots    = extract(/<meta[^>]+name=[\"']robots[\"'][^>]+content=[\"']([^\"']+)[\"']/i,html) ||\n                  extract(/<meta[^>]+content=[\"']([^\"']+)[\"'][^>]+name=[\"']robots[\"']/i,html) || 'index, follow';\n\nconst ogTitle = extract(/<meta[^>]+property=[\"']og:title[\"'][^>]+content=[\"']([^\"']{1,200})[\"']/i,html);\nconst ogDesc  = extract(/<meta[^>]+property=[\"']og:description[\"'][^>]+content=[\"']([^\"']{1,320})[\"']/i,html);\nconst ogImg   = extract(/<meta[^>]+property=[\"']og:image[\"'][^>]+content=[\"']([^\"']{1,300})[\"']/i,html);\n\nconst hasArticleSchema  = /<script[^>]+type=[\"']application\\/ld\\+json[\"'][^>]*>[\\s\\S]*?Article[\\s\\S]*?<\\/script>/i.test(html);\nconst hasFAQSchema      = /<script[^>]+type=[\"']application\\/ld\\+json[\"'][^>]*>[\\s\\S]*?FAQPage[\\s\\S]*?<\\/script>/i.test(html);\nconst hasBreadcrumb     = /<script[^>]+type=[\"']application\\/ld\\+json[\"'][^>]*>[\\s\\S]*?BreadcrumbList[\\s\\S]*?<\\/script>/i.test(html);\n\nconst bodyText = html.replace(/<script[\\s\\S]*?<\\/script>/gi,'').replace(/<style[\\s\\S]*?<\\/style>/gi,'').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ');\nconst wordCount = bodyText.trim().split(/\\s+/).filter(w=>w.length>2).length;\n\nconst imgTotal  = (html.match(/<img[\\s>]/gi)||[]).length;\nconst imgNoAlt  = (html.match(/<img(?![^>]*alt=[\"'][^\"']+[\"'])[^>]*>/gi)||[]).length;\n\nfunction checkHierarchy(h){\n  const tags=[]; const re=/<(h[1-6])[\\s>]/gi; let m;\n  while((m=re.exec(h))!==null) tags.push(parseInt(m[1].replace('h','')));\n  if(!tags.length) return 'sem headings';\n  for(let i=1;i<tags.length;i++) if(tags[i]>tags[i-1]+1) return 'quebrada';\n  return 'ok';\n}\nconst hierarchy = checkHierarchy(html);\n\nlet score=0;\nconst tl=title.length, dl=desc.length;\nif(tl>=40&&tl<=60) score+=2; else if(tl>=30&&tl<=70) score+=1;\nif(dl>=120&&dl<=160) score+=2; else if(dl>=80&&dl<=180) score+=1;\nif(h1Count===1) score+=2; else if(h1Count>0) score+=1;\nif(canonical) score+=1;\nif(hierarchy==='ok') score+=1;\nif(ogTitle) score+=1;\nif(ogImg) score+=1;\nif(hasArticleSchema) score+=1;\nif(wordCount>=800) score+=1;\n\nconst issues=[];\nif(!title)                         issues.push('Title ausente');\nelse if(tl<30||tl>70)              issues.push(`Title fora do range (${tl} chars — ideal 40-60)`);\nif(!desc)                          issues.push('Meta description ausente');\nelse if(dl<80||dl>180)             issues.push(`Description fora do range (${dl} chars — ideal 120-160)`);\nif(h1Count===0)                    issues.push('H1 ausente');\nelse if(h1Count>1)                 issues.push(`Múltiplos H1 (${h1Count})`);\nif(!canonical)                     issues.push('Tag canonical ausente');\nif(robots.includes('noindex'))     issues.push('Página com noindex — não será indexada');\nif(hierarchy==='quebrada')         issues.push('Hierarquia de headings quebrada');\nif(!ogTitle)                       issues.push('OG title ausente');\nif(!ogImg)                         issues.push('OG image ausente');\nif(!hasArticleSchema)              issues.push('Schema Article ausente');\nif(wordCount<600)                  issues.push(`Conteúdo curto (${wordCount} palavras — mínimo 600)`);\nif(imgNoAlt>0)                     issues.push(`${imgNoAlt} imagem(ns) sem alt text`);\n\nreturn {\n  url, title, title_length: tl,\n  description: desc, description_length: dl,\n  h1: h1Text, h1_count: h1Count, h2_count: h2Count, h3_count: h3Count, h4_count: h4Count, h5_count: h5Count,\n  canonical: canonical||'ausente', robots,\n  og_title: ogTitle||'ausente', og_description: ogDesc||'ausente', og_image: ogImg||'ausente',\n  schema_article: hasArticleSchema?'sim':'não',\n  schema_faq: hasFAQSchema?'sim':'não',\n  schema_breadcrumb: hasBreadcrumb?'sim':'não',\n  word_count: wordCount,\n  img_total: imgTotal, img_sem_alt: imgNoAlt,\n  heading_hierarchy: hierarchy,\n  score_onpage: score,\n  issues_onpage: issues.join(' | ') || 'nenhum',\n  issues_count: issues.length\n};"
+      },
+      "id": "4c0d6658-15e0-48da-bf54-1ca364a49a27",
+      "name": "Extrair On-Page SEO",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const item = $input.item.json;\nconst url = item.url || item.canonical || '';\nreturn { json: { ...item, url: url, _url_encoded: encodeURIComponent(url) } };"
+      },
+      "id": "65d2bffb-ab03-4b51-9579-b8dcb13a6b13",
+      "name": "Preparar URL para APIs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://analyticsdata.googleapis.com/v1beta/properties/SEU_PROPERTY_ID_GA4:runReport",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleAnalyticsOAuth2",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"dateRanges\": [{ \"startDate\": \"28daysAgo\", \"endDate\": \"today\" }],\n  \"dimensions\": [{ \"name\": \"pagePath\" }],\n  \"metrics\": [\n    { \"name\": \"sessions\" },\n    { \"name\": \"screenPageViews\" },\n    { \"name\": \"bounceRate\" },\n    { \"name\": \"averageSessionDuration\" },\n    { \"name\": \"newUsers\" }\n  ],\n  \"dimensionFilter\": {\n    \"filter\": {\n      \"fieldName\": \"pagePath\",\n      \"stringFilter\": {\n        \"matchType\": \"EXACT\",\n        \"value\": \"{{ $json.url.replace('https://meusite.com.br', '') }}\"\n      }\n    }\n  }\n}",
+        "options": {}
+      },
+      "id": "f6237605-3e65-41c1-a9ef-c83597126fa2",
+      "name": "GA4 — Métricas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1328,
+        912
+      ],
+      "credentials": {
+        "googleAnalyticsOAuth2": {
+          "name": "Google Analytics account 4"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://searchconsole.googleapis.com/webmasters/v3/sites/https%3A%2F%2Fmeusite.com.br%2F/searchAnalytics/query",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"startDate\": \"2026-02-18\",\n  \"endDate\": \"2026-05-18\",\n  \"dimensions\": [\"query\"],\n  \"dimensionFilterGroups\": [{\n    \"filters\": [{\n      \"dimension\": \"page\",\n      \"operator\": \"equals\",\n      \"expression\": \"{{ $json.url }}\"\n    }]\n  }],\n  \"rowLimit\": 10\n}",
+        "options": {}
+      },
+      "id": "5c6c806a-7f09-493a-a910-019cc3bd45d7",
+      "name": "GSC — Search Analytics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1744,
+        912
+      ],
+      "credentials": {
+        "googleOAuth2Api": {
+          "name": "Search Console"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const item = $input.item.json;\n\nconst score = item.score_onpage || 0;\nconst sessions = item.ga4_sessions || 0;\nconst position = item.gsc_avg_position || 0;\nconst ctr = item.gsc_ctr || 0;\n\nlet prioridade, prioridade_razao;\nif (sessions >= 200 && score <= 6) {\n  prioridade = 'P1'; prioridade_razao = 'Alto tráfego com SEO on-page fraco — impacto imediato';\n} else if (sessions >= 200 && score >= 7 && (position > 10 || ctr < 2)) {\n  prioridade = 'P1'; prioridade_razao = 'Alto tráfego mas posição ou CTR baixos — otimizar title/desc';\n} else if ((sessions >= 50 && score <= 6) || (position > 10 && sessions >= 50)) {\n  prioridade = 'P2'; prioridade_razao = 'Tráfego médio com oportunidade de melhoria';\n} else if (sessions < 50 && score <= 4) {\n  prioridade = 'P2'; prioridade_razao = 'Pouco tráfego e SEO fraco — potencial não explorado';\n} else {\n  prioridade = 'P3'; prioridade_razao = 'Página estável — monitorar';\n}\n\nconst now = new Date();\nconst dataAuditoria = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR');\n\nreturn { json: { ...item, prioridade, prioridade_razao, data_auditoria: dataAuditoria } };"
+      },
+      "id": "7b9e4b8e-7a19-4be4-bca2-9ed1912905aa",
+      "name": "Merge GA4 + GSC + On-Page",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2048,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "SEU_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Auditoria Completa",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "URL"
+          ],
+          "schema": [
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title_length",
+              "displayName": "title_length",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "description_length",
+              "displayName": "description_length",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "h1",
+              "displayName": "h1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "h1_count",
+              "displayName": "h1_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "h2_count",
+              "displayName": "h2_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "h3_count",
+              "displayName": "h3_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "h4_count",
+              "displayName": "h4_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "h5_count",
+              "displayName": "h5_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "canonical",
+              "displayName": "canonical",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "robots",
+              "displayName": "robots",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "og_title",
+              "displayName": "og_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "og_description",
+              "displayName": "og_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "og_image",
+              "displayName": "og_image",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "schema_article",
+              "displayName": "schema_article",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "schema_faq",
+              "displayName": "schema_faq",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "schema_breadcrumb",
+              "displayName": "schema_breadcrumb",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "word_count",
+              "displayName": "word_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "img_total",
+              "displayName": "img_total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "img_sem_alt",
+              "displayName": "img_sem_alt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "heading_hierarchy",
+              "displayName": "heading_hierarchy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "score_onpage",
+              "displayName": "score_onpage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "issues_onpage",
+              "displayName": "issues_onpage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "issues_count",
+              "displayName": "issues_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "_url_encoded",
+              "displayName": "_url_encoded",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ga4_sessions",
+              "displayName": "ga4_sessions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ga4_pageviews",
+              "displayName": "ga4_pageviews",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ga4_bounce_rate",
+              "displayName": "ga4_bounce_rate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ga4_avg_session_sec",
+              "displayName": "ga4_avg_session_sec",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ga4_new_users",
+              "displayName": "ga4_new_users",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "gsc_clicks",
+              "displayName": "gsc_clicks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "gsc_impressions",
+              "displayName": "gsc_impressions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "gsc_ctr",
+              "displayName": "gsc_ctr",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "gsc_avg_position",
+              "displayName": "gsc_avg_position",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "gsc_top_queries",
+              "displayName": "gsc_top_queries",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "prioridade",
+              "displayName": "prioridade",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "prioridade_razao",
+              "displayName": "prioridade_razao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "data_auditoria",
+              "displayName": "data_auditoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ia_resumo",
+              "displayName": "ia_resumo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ia_potencial",
+              "displayName": "ia_potencial",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ia_recomendacoes",
+              "displayName": "ia_recomendacoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ia_sugestao_title",
+              "displayName": "ia_sugestao_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ia_sugestao_description",
+              "displayName": "ia_sugestao_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ia_oportunidades",
+              "displayName": "ia_oportunidades",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "86d4d9c5-c86f-4a9f-8740-2065ce40197b",
+      "name": "Google Sheets — Auditoria Completa",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        2976,
+        528
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/sua-org/seu-repo/contents/_posts",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        80,
+        688
+      ],
+      "id": "6a772f9f-b81d-46b2-9e50-08cdcdef1319",
+      "name": "GitHubAPI",
+      "credentials": {
+        "githubApi": {
+          "name": "GitHub SEO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst urlsVistas = new Set();\n\nreturn items\n  .filter(item => {\n    const content = item.json.body || item.json.data || '';\n    if (/published:\\s*false/i.test(content)) return false;\n    return true;\n  })\n  .map(item => {\n    const content = item.json.body || item.json.data || '';\n    \n    const permalinkMatch = content.match(/permalink:\\s*[\"']?([^\"'\\n]+)[\"']?/);\n    if (permalinkMatch) {\n      const permalink = permalinkMatch[1].trim().replace(/^\\/|\\/$/g, '');\n      return {\n        json: {\n          url: `https://meusite.com.br/${permalink}/`\n        }\n      };\n    }\n    \n    const downloadUrl = item.json.download_url || '';\n    let slug = downloadUrl.split('/').pop()?.replace(/\\.md$/, '').split('?')[0] || '';\n    slug = slug.replace(/^\\d{4}-\\d{2}-\\d{2}-/, '');\n    \n    return {\n      json: {\n        url: `https://meusite.com.br/${slug}/`\n      }\n    };\n  })\n  .filter(item => {\n    const url = item.json.url;\n    if (!url || url === 'https://meusite.com.br//') return false;\n    if (urlsVistas.has(url)) return false;\n    urlsVistas.add(url);\n    return true;\n  });"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        688
+      ],
+      "id": "9a0403a6-ae13-4b58-b7a2-d304fbaa7c5c",
+      "name": "Extrair URLs dos Posts"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const ga4Response = $input.item.json;\nconst onPage = $('Preparar URL para APIs').item.json;\n\nconst ga4Rows = ga4Response.rows || [];\nlet ga4 = { ga4_sessions:0, ga4_pageviews:0, ga4_bounce_rate:0, ga4_avg_session_sec:0, ga4_new_users:0 };\nif (ga4Rows.length > 0) {\n  const m = ga4Rows[0].metricValues;\n  ga4 = {\n    ga4_sessions: Math.round(parseFloat(m[0]?.value || 0)),\n    ga4_pageviews: Math.round(parseFloat(m[1]?.value || 0)),\n    ga4_bounce_rate: parseFloat((parseFloat(m[2]?.value || 0) * 100).toFixed(1)),\n    ga4_avg_session_sec: Math.round(parseFloat(m[3]?.value || 0)),\n    ga4_new_users: Math.round(parseFloat(m[4]?.value || 0))\n  };\n}\n\nreturn { json: { ...onPage, ...ga4 } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        912
+      ],
+      "id": "8c788e0e-5738-4934-8cc4-e4d91a4ef65c",
+      "name": "Enriquecer com GA4"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const gscResponse = $input.item.json;\nconst base = $('Enriquecer com GA4').item.json;\n\nconst gscRows = gscResponse.rows || [];\nlet totalClicks = 0, totalImpressions = 0, positions = [], queries = [];\ngscRows.forEach(r => {\n  totalClicks += r.clicks || 0;\n  totalImpressions += r.impressions || 0;\n  positions.push(r.position || 0);\n  if (r.keys && r.keys[0]) queries.push(r.keys[0]);\n});\nconst avgPosition = positions.length ? parseFloat((positions.reduce((a,b)=>a+b,0)/positions.length).toFixed(1)) : 0;\nconst avgCTR = totalImpressions ? parseFloat(((totalClicks/totalImpressions)*100).toFixed(2)) : 0;\n\nconst gsc = {\n  gsc_clicks: totalClicks,\n  gsc_impressions: totalImpressions,\n  gsc_ctr: avgCTR,\n  gsc_avg_position: avgPosition,\n  gsc_top_queries: queries.slice(0,5).join(', ') || 'sem dados'\n};\n\nreturn { json: { ...base, ...gsc } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        912
+      ],
+      "id": "c3242239-b2a0-4fa8-8630-bb829289b550",
+      "name": "Enriquecer com GSC"
+    },
+    {
+      "parameters": {
+        "batchSize": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        656,
+        688
+      ],
+      "id": "ee86e67c-a0b1-4bf2-afcc-82b4120d9ac6",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1184,
+        1072
+      ],
+      "id": "d39c8d00-a381-4b52-878e-d53b3556155d",
+      "name": "Wait",
+      "webhookId": "b797c15e-dc61-42e4-adf5-0bae241530da"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.download_url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        256,
+        688
+      ],
+      "id": "380b7f95-4648-49f2-97db-a87292c53e5a",
+      "name": "Buscar Conteúdo Raw"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "SUA_API_KEY_AQUI"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.parse($json.gemini_body) }}",
+        "options": {}
+      },
+      "id": "c3216927-a7fd-4183-9949-2c71053a285b",
+      "name": "Gemini — Análise e Recomendações",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        2528,
+        528
+      ],
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 5,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const geminiItems = $input.all();\nconst gscItems = $('Enriquecer com GSC').all();\n\nreturn geminiItems.map((item, idx) => {\n  const geminiResp = item.json;\n  const dadosCompletos = { ...(gscItems[idx]?.json || {}) };\n\n  const camposRemover = ['candidates', 'usageMetadata', 'modelVersion', 'responseId', 'gemini_body'];\n  camposRemover.forEach(campo => delete dadosCompletos[campo]);\n\n  let geminiParsed = {};\n  try {\n    const rawText = geminiResp.candidates?.[0]?.content?.parts?.[0]?.text || '';\n    const clean = rawText.replace(/```json|```/g, '').trim();\n    \n    // Tenta parse direto\n    try {\n      geminiParsed = JSON.parse(clean);\n    } catch(e1) {\n      // Tenta extrair só o bloco JSON principal\n      const match = clean.match(/\\{[\\s\\S]*\\}/);\n      if (match) {\n        try {\n          geminiParsed = JSON.parse(match[0]);\n        } catch(e2) {\n          geminiParsed = {};\n        }\n      }\n    }\n  } catch (e) {\n    geminiParsed = {};\n  }\n\n  const temResposta = Object.keys(geminiParsed).length > 0;\n\n  return {\n    json: {\n      ...dadosCompletos,\n      prioridade: temResposta ? (geminiParsed.prioridade || dadosCompletos.prioridade || '') : dadosCompletos.prioridade || '',\n      prioridade_razao: temResposta ? (geminiParsed.prioridade_razao || dadosCompletos.prioridade_razao || '') : dadosCompletos.prioridade_razao || '',\n      data_auditoria: new Date().toLocaleDateString('pt-BR'),\n      ia_resumo: geminiParsed.resumo_diagnostico || '',\n      ia_potencial: geminiParsed.potencial_estimado || '',\n      ia_recomendacoes: JSON.stringify(geminiParsed.recomendacoes || []),\n      ia_sugestao_title: geminiParsed.sugestao_title || '',\n      ia_sugestao_description: geminiParsed.sugestao_description || '',\n      ia_oportunidades: geminiParsed.oportunidades_conteudo || '',\n      elegibilidade_ai_overview: geminiParsed.elegibilidade_ai_overview || '',\n      elegibilidade_ai_overview_razao: geminiParsed.elegibilidade_ai_overview_razao || '',\n      score_llm: geminiParsed.score_llm || '',\n      score_llm_razao: geminiParsed.score_llm_razao || '',\n      geo_citabilidade_llm: geminiParsed.geo_citabilidade_llm || '',\n      geo_gap_principal: geminiParsed.geo_gap_principal || '',\n      geo_acao_prioritaria: geminiParsed.geo_acao_prioritaria || '',\n      briefing_gem: geminiParsed.briefing_gem || '',\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2752,
+        528
+      ],
+      "id": "1a0a1a6a-deef-4b61-b8cd-b2aeecfd2ccc",
+      "name": "Combinar Gemini com Dados"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const item = $input.item.json;\n\nconst safe = (val, maxLen = 300) => String(val || '')\n  .replace(/[\\x00-\\x1F\\x22\\x27\\x5C]/g, ' ')\n  .trim()\n  .substring(0, maxLen);\n\nconst text = `Retorne APENAS o objeto JSON, sem texto antes ou depois, sem markdown, sem blocos de código. O JSON deve ser estritamente válido — todos os objetos devem estar corretamente fechados com chaves.\n\nVocê é um especialista em SEO para o site meusite.com.br. Analise os dados abaixo e retorne SOMENTE um JSON válido, sem texto adicional, sem markdown, sem explicações. O JSON deve ter exatamente estes campos: resumo_diagnostico (string), potencial_estimado (alta/media/baixa), recomendacoes (array de objetos com campo, acao, esforco, impacto), sugestao_title (string), sugestao_description (string), oportunidades_conteudo (string), prioridade (alta/media/baixa), prioridade_razao (string), elegibilidade_ai_overview (sim/nao/parcial), elegibilidade_ai_overview_razao (string), score_llm (número de 0 a 10), score_llm_razao (string), geo_citabilidade_llm (número de 0 a 10 indicando o quanto o conteúdo é citável por LLMs como ChatGPT e Gemini), geo_gap_principal (string descrevendo a principal lacuna de conteúdo para GEO — Generative Engine Optimization), geo_acao_prioritaria (string com a ação mais urgente para melhorar a presença em respostas geradas por IA), briefing_gem (string com um briefing resumido para o time de conteúdo sobre o que produzir ou melhorar nessa página considerando GEO).\n\nURL: ${safe(item.url)}\nTítulo: ${safe(item.title)}\nDescrição: ${safe(item.description)}\nH1: ${safe(item.h1)}\nScore On-Page: ${safe(item.score_onpage)}\nSessões GA4: ${safe(item.ga4_sessions)}\nPageviews: ${safe(item.ga4_pageviews)}\nPosição GSC: ${safe(item.gsc_avg_position)}\nCliques GSC: ${safe(item.gsc_clicks)}\nTop queries: ${safe(item.gsc_top_queries, 200)}\nPrioridade: ${safe(item.prioridade)}\nSchema FAQ: ${safe(item.schema_faq)}\nSchema Article: ${safe(item.schema_article)}\nWord Count: ${safe(item.word_count)}\nH2 Count: ${safe(item.h2_count)}\nIssues Count: ${safe(item.issues_count)}`;\n\nreturn {\n  json: {\n    ...item,\n    gemini_body: JSON.stringify({\n      contents: [{ parts: [{ text }] }],\n      generationConfig: { temperature: 0.3, maxOutputTokens: 8000 }\n    })\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2288,
+        528
+      ],
+      "id": "c017e0c3-7f31-4a23-8164-a3ebd11e45e8",
+      "name": "Preparar Body Gemini"
+    },
+    {
+      "parameters": {
+        "amount": 8
+      },
+      "id": "7a840181-a3af-4483-94ca-89ca3f0636e7",
+      "name": "Rate Limit 8s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        864,
+        704
+      ],
+      "webhookId": "rate-limit-seo"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "GitHubAPI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar HTML": {
+      "main": [
+        [
+          {
+            "node": "Extrair On-Page SEO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair On-Page SEO": {
+      "main": [
+        [
+          {
+            "node": "Preparar URL para APIs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar URL para APIs": {
+      "main": [
+        [
+          {
+            "node": "GA4 — Métricas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GA4 — Métricas": {
+      "main": [
+        [
+          {
+            "node": "Enriquecer com GA4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge GA4 + GSC + On-Page": {
+      "main": [
+        [
+          {
+            "node": "Preparar Body Gemini",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHubAPI": {
+      "main": [
+        [
+          {
+            "node": "Buscar Conteúdo Raw",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair URLs dos Posts": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GSC — Search Analytics": {
+      "main": [
+        [
+          {
+            "node": "Enriquecer com GSC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enriquecer com GA4": {
+      "main": [
+        [
+          {
+            "node": "GSC — Search Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enriquecer com GSC": {
+      "main": [
+        [
+          {
+            "node": "Merge GA4 + GSC + On-Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Rate Limit 8s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets — Auditoria Completa": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Conteúdo Raw": {
+      "main": [
+        [
+          {
+            "node": "Extrair URLs dos Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini — Análise e Recomendações": {
+      "main": [
+        [
+          {
+            "node": "Combinar Gemini com Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combinar Gemini com Dados": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets — Auditoria Completa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Body Gemini": {
+      "main": [
+        [
+          {
+            "node": "Gemini — Análise e Recomendações",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rate Limit 8s": {
+      "main": [
+        [
+          {
+            "node": "Buscar HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "75ed6154-ae29-439d-80be-7250eb20c14d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b362833d2a7fc4c04ded0dc0f385de9d7da7bfd2c611ec96d1e00af9e3c6a6fe"
+  },
+  "nodeGroups": [],
+  "id": "GsIMcub6c4FY9E4T",
+  "tags": []
+}
