@@ -26,6 +26,8 @@ A primeira rodada completa processou 317 URLs únicas (656 linhas de dados, cruz
 
 ![Diagrama do fluxo do SEO Audit Pro](/assets/images/fluxo-seo-audit-pro.svg)
 
+[Baixar o workflow (JSON exportado do n8n, com dados sensíveis removidos)](/assets/workflows/seo-audit-pro.json)
+
 ## Decisões de design
 
 - Separei a coleta de dados brutos (GSC/GA4) da etapa de diagnóstico via IA, para poder auditar novamente sem reprocessar tudo do zero quando só os dados de tráfego mudam
