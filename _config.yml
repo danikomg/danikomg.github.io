@@ -1,0 +1,23 @@
+title: Daniel Rodrigues
+description: Portfólio de projetos em Martech, automação, conteúdo e dados
+remote_theme: pages-themes/minimal@v0.2.0
+plugins:
+  - jekyll-remote-theme
+
+# Coleção de projetos — cada arquivo em _projetos/ vira uma página.
+# O campo "tipo" no front matter (case-study, ebook, video, apresentacao)
+# é usado na home para agrupar os itens.
+collections:
+  projetos:
+    output: true
+    permalink: /projetos/:name/
+
+defaults:
+  - scope:
+      path: ""
+      type: "projetos"
+    values:
+      layout: default
+
+exclude:
+  - README.md
