@@ -1,0 +1,390 @@
+{
+  "name": "[CJ] SEO - Descoberta de territórios novos de palavras-chaves",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "id": "11cfe9e0-6517-4e1e-93e4-b49c9fa8f804",
+      "name": "Agendar (semanal)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -176,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://meusite.com.br/sitemap.xml",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "bf49ebb9-1152-439b-9f48-4f3e3ae3ac43",
+      "name": "Buscar sitemap",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        48,
+        240
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extrai os caminhos do sitemap.xml e normaliza para comparação de gap.\nconst xml = items[0].json.data || items[0].json.body || items[0].json.body?.toString() || \"\";\n\nconst norm = s => s.toLowerCase()\n  .normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\")\n  .replace(/[^a-z0-9 ]/g, \" \")\n  .replace(/\\s+/g, \" \").trim();\n\nconst locs = [...String(xml).matchAll(/<loc>(.*?)<\\/loc>/g)].map(m => m[1]);\n\nconst slugs = locs.map(u => {\n  try { return norm(new URL(u).pathname); }\n  catch (e) { return \"\"; }\n}).filter(s => s.length > 2);\n\nreturn [{ json: { slugs, total: slugs.length } }];\n"
+      },
+      "id": "415f59e1-1178-4b81-97f2-25ee852ae194",
+      "name": "Slugs existentes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        272,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Núcleos atuais + monta o prompt de adjacências para o Gemini.\n// Edite a lista abaixo com os temas que VOCÊ JÁ COBRE no blog.\nconst nucleos = [\n  \"aposentadoria especial\",\n  \"pensão por morte\",\n  \"justa causa\",\n  \"contribuição previdenciária do servidor público\",\n  \"seguro-desemprego\"\n];\n\nconst promptText =\n`Voce e um estrategista de SEO no nicho juridico brasileiro (previdenciario, trabalhista e civel).\nAbaixo estao os temas que o site JA cobre:\n${JSON.stringify(nucleos)}\n\nGere 12 TERRITORIOS NOVOS de palavra-chave que sejam adjacentes a esses temas, mas que o site ainda NAO cobre.\nPense sempre no evento de vida que faz uma pessoa pesquisar (ex.: \"fui demitido\", \"meu pai faleceu\", \"tenho um filho autista\").\nRegras:\n- nao repita nenhum dos temas ja cobertos\n- cada item deve ser uma expressao curta de 2 a 4 palavras, em portugues do Brasil, em minusculas\n- foco em situacoes juridicas reais com demanda de busca\nResponda APENAS com um array JSON de strings, sem texto extra.`;\n\nreturn [{ json: { nucleos, promptText } }];\n"
+      },
+      "id": "e64b9ada-9dc7-4ac0-bb7e-18b2c563ee84",
+      "name": "Núcleos atuais",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ contents: [{ parts: [{ text: $json.promptText }] }], generationConfig: { responseMimeType: \"application/json\", temperature: 0.9 } }) }}",
+        "options": {}
+      },
+      "id": "0d46be5f-1e28-41fa-bd1e-05fb8db39e1d",
+      "name": "Gemini: adjacências",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        704,
+        240
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lê a resposta do Gemini e transforma cada adjacência em uma seed.\nconst raw = items[0].json;\nlet texto = \"\";\ntry {\n  texto = raw.candidates[0].content.parts[0].text;\n} catch (e) {\n  throw new Error(\"Resposta do Gemini fora do formato esperado: \" + JSON.stringify(raw).slice(0, 300));\n}\n\nlet lista = [];\ntry {\n  lista = JSON.parse(texto);\n} catch (e) {\n  // fallback: extrai itens entre aspas caso venha com texto em volta\n  lista = [...texto.matchAll(/\"([^\"]+)\"/g)].map(m => m[1]);\n}\n\nreturn lista\n  .filter(Boolean)\n  .map(seed => ({ json: { seed: String(seed).trim().toLowerCase() } }));\n"
+      },
+      "id": "fea8c6b7-a7fa-492e-bfc2-d577c8819be1",
+      "name": "Adjacências → seeds",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Gera variações de cada seed para o autocomplete.\nconst seeds = items.map(i => i.json.seed).filter(Boolean);\n\nconst perguntas = [\n  \"como funciona\", \"o que e\", \"quem tem direito a\", \"tenho direito a\",\n  \"quanto tempo\", \"qual o valor de\", \"vale a pena\", \"e possivel\",\n  \"como dar entrada em\", \"como solicitar\", \"como calcular\",\n  \"documentos para\", \"prazo para\", \"passo a passo\"\n];\nconst conectores = [\"para\", \"com\", \"sem\", \"depois de\", \"antes de\", \"apos\", \"em caso de\"];\nconst alfabeto = \"abcdefghijklmnopqrstuvwxyz\".split(\"\");\n\nconst out = [];\nconst seen = new Set();\n\nfor (const seed of seeds) {\n  const add = (query, tipo) => {\n    const key = query.trim().toLowerCase().replace(/\\s+/g, \" \");\n    if (key && !seen.has(key)) {\n      seen.add(key);\n      out.push({ json: { query: key, seed, tipo } });\n    }\n  };\n  add(seed, \"base\");\n  for (const p of perguntas) add(`${p} ${seed}`, \"pergunta\");\n  for (const c of conectores) add(`${seed} ${c}`, \"conector\");\n  for (const l of alfabeto)  add(`${seed} ${l}`, \"alfabeto\");\n}\n\nreturn out;\n"
+      },
+      "id": "8958d9db-eae0-4559-88c8-c72f2b44055c",
+      "name": "Gerar variações",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://suggestqueries.google.com/complete/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "client",
+              "value": "firefox"
+            },
+            {
+              "name": "hl",
+              "value": "pt-BR"
+            },
+            {
+              "name": "gl",
+              "value": "br"
+            },
+            {
+              "name": "q",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 300
+            }
+          }
+        }
+      },
+      "id": "cc451ac5-97e9-4fd4-93c5-bf053c9cba79",
+      "name": "Autocomplete Google",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        240
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lê as sugestões do autocomplete, conta frequência e filtra o que já é coberto.\nconst existentes = $('Slugs existentes').first().json.slugs || [];\n\nconst norm = s => s.toLowerCase()\n  .normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\")\n  .replace(/[^a-z0-9 ]/g, \"\")\n  .replace(/\\s+/g, \" \").trim();\n\nconst cobre = existentes.map(norm);\n\n// conta frequência das sugestões (aparecer em várias expansões = sinal de demanda)\nconst freq = new Map();\nfor (const item of items) {\n  const raw = item.json;\n  let arr = [];\n  if (Array.isArray(raw)) arr = raw[1];\n  else if (Array.isArray(raw.data)) arr = raw.data[1];\n  else arr = raw[1] || raw.suggestions || [];\n  for (const s of (arr || [])) {\n    const q = typeof s === \"string\" ? s : (s && s[0]);\n    if (!q) continue;\n    const n = norm(q);\n    if (!freq.has(n)) freq.set(n, { query: q, n, freq: 0 });\n    freq.get(n).freq += 1;\n  }\n}\n\nconst novas = [...freq.values()]\n  .filter(x => x.n.split(\" \").length >= 3)                              // cauda longa\n  .filter(x => !cobre.some(c => c && (x.n.includes(c) || c.includes(x.n)))); // gap real\n\nreturn novas.map(x => ({ json: { query: x.query, freq: x.freq } }));\n"
+      },
+      "id": "eee5aa4f-48a9-4e7f-a874-b1cd1c5c0173",
+      "name": "Parsear + filtrar gap",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1584,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pontua e classifica em tiers. Adiciona a data para o snapshot histórico.\nconst hoje = new Date().toISOString().slice(0, 10);\n\nconst scored = items.map(i => {\n  const q = i.json.query;\n  const freq = i.json.freq || 1;\n  const palavras = q.trim().split(/\\s+/).length;\n  // sinais gratuitos: frequência no autocomplete + bônus leve de cauda longa\n  const bonusCauda = palavras >= 5 ? 1.2 : 1;\n  const score = Math.round(freq * 10 * bonusCauda);\n  let tier = \"T3\";\n  if (score >= 40) tier = \"T1\";\n  else if (score >= 20) tier = \"T2\";\n  return { json: { data: hoje, query: q, freq, palavras, score, tier } };\n});\n\nscored.sort((a, b) => b.json.score - a.json.score);\nreturn scored;\n"
+      },
+      "id": "38acd131-c468-4ac6-b712-adc55990e429",
+      "name": "Score + tier",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Oportunidades",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": []
+        },
+        "options": {}
+      },
+      "id": "f0d6a9be-87bf-4780-8335-05249391b255",
+      "name": "Snapshot no Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2032,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Preencher antes de rodar\n1. **Buscar sitemap**: troque SEU-DOMINIO.com.br pelo seu sitemap.xml real.\n2. **Gemini**: crie uma credencial HTTP Header Auth com nome `x-goog-api-key` e valor = sua API key do Gemini.\n3. **Núcleos atuais**: edite a lista com os temas que você JÁ cobre.\n4. **Snapshot no Sheets**: aponte para a planilha e a aba (crie o cabeçalho: data, query, freq, palavras, score, tier).",
+        "height": 228,
+        "width": 520
+      },
+      "id": "502f4b24-15de-4d85-b8a6-5c856b7f67c3",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Throttle do autocomplete\nO batching está em 1 req / 300ms para não tomar bloqueio do Google. Com ~12 adjacências isso roda em poucos minutos. Se aumentar muito as seeds, suba o intervalo.",
+        "height": 150,
+        "width": 460
+      },
+      "id": "c856b59a-8197-4314-bfe2-230c41a1624b",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Onde plugar Trends/SERP\nO score atual usa frequência no autocomplete (proxy de demanda). Para refinar, insira antes deste nó uma chamada a pytrends (via serviço externo) ou um nó que detecte PAA/anúncios na SERP e multiplique o score.",
+        "height": 150,
+        "width": 460
+      },
+      "id": "07e1bdb3-a490-42f3-8a27-84f2ae84b380",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Agendar (semanal)": {
+      "main": [
+        [
+          {
+            "node": "Buscar sitemap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar sitemap": {
+      "main": [
+        [
+          {
+            "node": "Slugs existentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slugs existentes": {
+      "main": [
+        [
+          {
+            "node": "Núcleos atuais",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Núcleos atuais": {
+      "main": [
+        [
+          {
+            "node": "Gemini: adjacências",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini: adjacências": {
+      "main": [
+        [
+          {
+            "node": "Adjacências → seeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Adjacências → seeds": {
+      "main": [
+        [
+          {
+            "node": "Gerar variações",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar variações": {
+      "main": [
+        [
+          {
+            "node": "Autocomplete Google",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Autocomplete Google": {
+      "main": [
+        [
+          {
+            "node": "Parsear + filtrar gap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear + filtrar gap": {
+      "main": [
+        [
+          {
+            "node": "Score + tier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score + tier": {
+      "main": [
+        [
+          {
+            "node": "Snapshot no Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "261814c8-fb78-4d8a-bb70-b783a1a2de47",
+  "meta": {
+    "instanceId": "SEU_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "zymTWwbHnlkwC9Hl",
+  "tags": []
+}
