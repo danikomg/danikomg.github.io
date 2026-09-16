@@ -29,6 +29,8 @@ Desenhei e implementei um workflow no n8n que automatiza o processo do início a
 
 ![Diagrama do fluxo de automação de publicação no LinkedIn](/assets/images/fluxo-linkedin.svg)
 
+[Baixar o workflow (JSON exportado do n8n, com dados sensíveis removidos)](/assets/workflows/automacao-linkedin.json)
+
 ## Decisões de design
 
 - Mantive uma etapa de aprovação humana no fim do fluxo em vez de publicação 100% automática, para preservar controle editorial e evitar erros de IA indo ao ar sem revisão
