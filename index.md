@@ -3,12 +3,12 @@ layout: default
 title: Início
 ---
 
-# Daniel Rodrigues
+## 🗂️ Projetos
 
-Analista de marketing com experiência em automação, dados e produção de conteúdo. Abaixo estão projetos que documentam esse trabalho — fluxos de automação, e-books, estratégia, vídeos, mídias sociais e artigos publicados.
+Automação, SEO, conteúdo e estratégia aplicados ao dia a dia de marketing B2B. Cada projeto abaixo documenta um problema real e como resolvi.
 
 {% assign tipos = "case-study,ebook,estrategia,apresentacao,video,midia-social,artigo" | split: "," %}
-{% assign nomes_tipos = "Case studies,E-books,Estratégia,Apresentações,Vídeos,Mídias Sociais,Artigos publicados" | split: "," %}
+{% assign nomes_tipos = "🤖 Case studies,📚 E-books,🎯 Estratégia,🖥️ Apresentações,🎬 Vídeos,📱 Mídias Sociais,📰 Artigos publicados" | split: "," %}
 
 {% for tipo in tipos %}
   {% assign itens = site.projetos | where: "tipo", tipo %}
