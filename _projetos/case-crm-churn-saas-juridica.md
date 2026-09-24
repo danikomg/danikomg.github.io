@@ -51,5 +51,3 @@ Cada segmento recebeu uma jornada própria no Intercom, com e-mails automatizado
 - Identificação de gargalo crítico de produto que gerou demanda prioritária de melhoria na etapa de onboarding técnico
 
 ---
-
-*Case hipotético criado para portfólio. Dados simulados com base em benchmarks de SaaS B2B no Brasil.*
