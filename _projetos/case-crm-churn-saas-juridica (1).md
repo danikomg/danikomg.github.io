@@ -1,12 +1,11 @@
 ---
-layout: projeto
 title: "Segmentação comportamental para reduzir churn early-stage em SaaS jurídica"
 tipo: case-study
-data: 2026-09-20
-resumo: "Mapeamento de perfis de churn, definição de segmentos comportamentais e construção de jornadas de ativação diferenciadas no Intercom para reduzir cancelamentos nos primeiros 30 dias."
-ferramentas: [Intercom, Google Sheets, CRM]
-destaque: true
+stack: "Intercom · Google Sheets · Segmentação comportamental · Automação de e-mail e in-app"
+date: 2026-09-20
 ---
+
+# Segmentação comportamental para reduzir churn early-stage em SaaS jurídica
 
 **Stack:** Intercom · Google Sheets · Segmentação comportamental · Automação de e-mail e in-app
 
@@ -16,7 +15,7 @@ Uma SaaS jurídica B2B com foco em cálculos previdenciários e gestão de escri
 
 O ICP ideal da empresa eram escritórios médios e grandes (4+ advogados), com uso recorrente e potencial de expansão para um módulo de gestão (ERP jurídico). O problema: a aquisição ainda atraía volume alto do perfil fora do ICP, inflando o churn e distorcendo as métricas de cohort.
 
-A régua de onboarding era genérica — a mesma sequência de e-mails para um advogado solo e para um escritório de 20 pessoas — o que reduzia a relevância das mensagens para qualquer perfil.
+A régua de onboarding era genérica: a mesma sequência de e-mails para um advogado solo e para um escritório de 20 pessoas, o que reduzia a relevância das mensagens para qualquer perfil.
 
 ## A solução
 
@@ -29,19 +28,19 @@ Defini quatro segmentos com base em comportamento nos primeiros 14 dias, cruzand
 
 Cada segmento recebeu uma jornada própria no Intercom, com e-mails automatizados, mensagens in-app contextuais, bifurcações por comportamento e alertas para o time de CS.
 
-![Diagrama do fluxo de segmentação comportamental](/assets/img/crm-fluxo-segmentacao.png)
+![Diagrama do fluxo de segmentação comportamental](/assets/images/crm-fluxo-segmentacao.png)
 
 ## Decisões de design
 
-- Não usei tamanho do escritório como critério principal de segmentação — o comportamento nos primeiros 7 dias se mostrou um preditor mais forte de retenção do que o perfil declarado no cadastro
+- Não usei tamanho do escritório como critério principal de segmentação: o comportamento nos primeiros 7 dias se mostrou um preditor mais forte de retenção do que o perfil declarado no cadastro
 
-- O Segmento B recebeu mensagens que referenciavam o tipo de cálculo que o usuário tentou fazer (identificado pela sessão), e não mensagens genéricas de "tutorial". Isso aumentou significativamente a taxa de abertura porque a relevância percebida era alta
+- O Segmento B recebeu mensagens que referenciavam o tipo de cálculo que o usuário tentou fazer (identificado pela sessão), e não mensagens genéricas de "tutorial". Isso aumentou a taxa de abertura porque a relevância percebida era alta
 
 - A intervenção do Segmento A no dia 14 foi uma oferta de sessão de diagnóstico com CS, sem desconto de retenção. A hipótese era que usuários sem nenhum uso em 14 dias precisavam de orientação, não de preço
 
-- O fluxo de reativação (Segmento D) foi construído como uma atualização de produto, não como um e-mail de "volte". O primeiro contato em 30 dias não tinha CTA de reativação explícito — apenas apresentava uma novidade genuína
+- O fluxo de reativação (Segmento D) foi construído como uma atualização de produto, não como um e-mail de "volte". O primeiro contato em 30 dias não tinha CTA de reativação explícito: apresentava uma novidade genuína e deixava a decisão de retorno aberta
 
-- A análise de comportamento evidenciou que a etapa de configuração inicial (importação do CNIS) gerava abandono de 40% dos novos usuários — um gargalo que o time de produto não tinha visibilidade clara. O trabalho de CRM tornou o problema de produto mensurável
+- A análise de comportamento evidenciou que a etapa de configuração inicial (importação do CNIS) gerava abandono de 40% dos novos usuários, um gargalo que o time de produto não tinha visibilidade clara. O trabalho de CRM tornou o problema de produto mensurável
 
 ## Resultado
 
