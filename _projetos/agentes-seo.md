@@ -3,6 +3,7 @@ title: "Agentes de IA para produção e otimização de artigos de SEO"
 tipo: case-study
 stack: "Gemini Gems · Pesquisa em fontes oficiais · Markdown/Jekyll frontmatter"
 date: 2026-09-16
+published: false
 ---
 
 # Agentes de IA para produção e otimização de artigos de SEO
