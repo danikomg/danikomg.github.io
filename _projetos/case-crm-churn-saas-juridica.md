@@ -3,6 +3,7 @@ title: "Segmentação comportamental para reduzir churn early-stage em SaaS jur�
 tipo: case-study
 stack: "Intercom · Google Sheets · Segmentação comportamental · Automação de e-mail e in-app"
 date: 2026-09-20
+published: false
 ---
 
 # Segmentação comportamental para reduzir churn early-stage em SaaS jurídica
