@@ -3,6 +3,7 @@ title: "Newsletter Jurídica: criação de newsletter recorrente para substituir
 tipo: case-study
 stack: "Intercom · HTML (template próprio) · Google Apps Script · Google Sheets"
 date: 2026-09-20
+published: false
 ---
 
 # Newsletter Jurídica: criação de newsletter recorrente para substituir e-mails avulsos
