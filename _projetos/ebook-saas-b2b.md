@@ -2,6 +2,7 @@
 title: "Estratégias de crescimento e go-to-market para SaaS B2B"
 tipo: ebook
 date: 2023-08-18
+published: false
 ---
 
 E-book construído pela Dialetto para participação da Softplan no Startup Summit 2023.
