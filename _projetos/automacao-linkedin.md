@@ -3,6 +3,7 @@ title: "Automação de publicação no LinkedIn com n8n"
 tipo: case-study
 stack: "n8n · Google Sheets · Gemini · Google Drive · Slack"
 date: 2026-08-31
+published: false
 ---
 
 # Automação de publicação no LinkedIn com n8n
