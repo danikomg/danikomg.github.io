@@ -3,6 +3,7 @@ title: "SEO Audit Pro: auditoria automatizada de SEO em escala"
 tipo: case-study
 stack: "n8n · Google Search Console · Google Analytics 4 · Gemini · Google Sheets"
 date: 2026-08-31
+published: false
 ---
 
 # SEO Audit Pro: auditoria automatizada de SEO em escala
