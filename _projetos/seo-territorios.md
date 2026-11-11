@@ -3,6 +3,7 @@ title: "Descoberta automatizada de novos territórios de palavras-chave"
 tipo: case-study
 stack: "n8n · Sitemap XML · Gemini · Google Autocomplete · Google Sheets"
 date: 2026-09-16
+published: false
 ---
 
 # Descoberta automatizada de novos territórios de palavras-chave
