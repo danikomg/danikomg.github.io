@@ -1,15 +1,15 @@
 ---
 title: "O que se busca sobre marketing de conteúdo: um mapa de territórios a partir do autocomplete"
 tipo: case-study
-stack: "Python · Autocomplete do Google · classificação por regras"
+stack: "Python · Autocomplete do Google · GitHub Actions · classificação por regras"
 date: 2026-11-21
 ---
 
 # O que se busca sobre marketing de conteúdo: um mapa de territórios a partir do autocomplete
 
-**Stack:** Python (biblioteca padrão) · Autocomplete do Google · classificação por regras · CSV e JSON
+**Stack:** Python (biblioteca padrão) · Autocomplete do Google · GitHub Actions · classificação por regras · CSV e JSON
 
-> **Projeto autoral.** Feito por conta própria, com dados públicos coletados em 21/11/2026. Não usa dados, ferramentas internas ou materiais de nenhuma empresa em que trabalhei.
+> **Projeto autoral.** Feito por conta própria, com dados públicos. A primeira coleta é de 21/11/2026 e o mapa se atualiza sozinho todo mês. Não usa dados, ferramentas internas ou materiais de nenhuma empresa em que trabalhei.
 
 ## A pergunta
 
@@ -129,22 +129,50 @@ Termos de ferramentas e IA somam 42. Chamou a atenção que "claude" aparece em 
 | inteligencia artificial para conteudo | Ferramentas e IA | 18.56 |
 | inbound marketing curso gratuito | Formação e cursos | 18.45 |
 
+## Atualização automática e série histórica
+
+A primeira versão deste estudo era um retrato de um dia só, e o autocomplete muda. Para transformar o retrato em série, o mapa agora se atualiza sozinho com um fluxo do GitHub Actions:
+
+1. No dia 1 de cada mês, o GitHub roda o `coletar.py` e depois o `analisar.py`.
+2. O `serie.py` compara a nova coleta com a anterior e registra quantos termos entraram e saíram, além da distribuição por intenção.
+3. Os arquivos novos são gravados no próprio repositório e o site se atualiza.
+
+Há duas travas simples: a coleta é abortada se mais de 20% das consultas falharem, e é rejeitada se vier com menos de 600 termos, para que um dia ruim não contamine a série. O fluxo também pode ser disparado à mão. O código está em [coleta-mensal.yml](https://github.com/danikomg/danikomg.github.io/blob/main/.github/workflows/coleta-mensal.yml).
+
+### A série até agora
+
+{% assign serie = site.data.territorios_serie %}
+| Data | Termos | Materiais prontos | Formação e cursos | Como fazer | Ferramentas e IA | Termos novos | Termos que saíram |
+|---|---|---|---|---|---|---|---|
+{% for l in serie reversed -%}
+| {{ l.data }} | {{ l.termos }} | {{ l.materiais_prontos_pct }}% | {{ l.formacao_pct }}% | {{ l.como_fazer_pct }}% | {{ l.ferramentas_ia_pct }}% | {{ l.termos_novos }} | {{ l.termos_que_sairam }} |
+{% endfor %}
+
+{% assign mud = site.data.territorios_mudancas -%}
+{% if mud.novos.size > 0 -%}
+**O que mudou na última coleta ({{ mud.data }}, em relação a {{ mud.anterior }}).** Entre os termos novos: {% for t in mud.novos %}“{{ t }}”{% unless forloop.last %}; {% endunless %}{% endfor %}. Entre os que saíram: {% for t in mud.sairam %}“{{ t }}”{% unless forloop.last %}; {% endunless %}{% endfor %}.
+{% else -%}
+A comparação aparece a partir da segunda coleta. Com duas coletas bem próximas, a diferença mostra o quanto o autocomplete oscila por conta própria, o que ajuda a separar ruído de mudança real.
+{% endif %}
+
 ## Limites do estudo
 
 - **Autocomplete não é volume de busca.** Ele mostra o que o Google sugere, não quantas pessoas pesquisam. Uso a repetição como indício de relevância, nunca como número de buscas.
-- **A coleta é de um dia só.** As sugestões mudam com o tempo, a região e o histórico de quem pesquisa. Um retrato, não uma série.
+- **A série ainda é curta.** As sugestões mudam com o tempo, a região e o histórico de quem pesquisa. Uma coleta mensal só vira tendência depois de vários meses, e mudanças pequenas entre duas coletas podem ser só oscilação.
+- **A coleta roda em servidores do GitHub, nos Estados Unidos.** Peço resultados em português do Brasil, mas as sugestões podem diferir do que alguém no Brasil veria.
 - **As sementes são escolhas minhas.** Temas que eu não listei ficam sub-representados, e comparar canais (e-mail, LinkedIn, Instagram) não é confiável, porque "newsletter", "e-mail marketing" e "conteúdo para linkedin" estavam entre as sementes e puxam essas contagens para cima. "Pauta de conteúdo" e "métricas de conteúdo", por exemplo, devolveram poucas sugestões.
 - **As regras de classificação são simples.** Há termos que caem em "subtema ou variação" por falta de uma regra melhor, e essa é a maior categoria (261 termos).
 - **Mesmo com limpeza, sobra ruído.** Revisei por amostra, mas o filtro por palavras-chave não pega tudo.
 
 ## Arquivos para reproduzir
 
-- [termos.csv](/assets/territorios/termos.csv): os 1.007 termos, já classificados
+- [termos.csv](/assets/territorios/termos.csv): os termos da coleta mais recente, já classificados (as coletas anteriores ficam na pasta [series](https://github.com/danikomg/danikomg.github.io/tree/main/assets/territorios/series))
 - [resumo.json](/assets/territorios/resumo.json): os agregados usados nesta página
-- [coletar.py](/assets/territorios/coletar.py): a coleta em bola de neve
+- [coletar.py](/assets/territorios/coletar.py): a coleta em bola de neve, com trava contra coleta ruim
+- [serie.py](/assets/territorios/serie.py): registra cada coleta na série e compara com a anterior
 - [analisar.py](/assets/territorios/analisar.py): limpeza, classificação e pontuação
 
-Para rodar, basta ter Python 3 e executar `python3 coletar.py bruto.json` e depois `python3 analisar.py bruto.json pasta_de_saida`. Trocar as sementes no começo de `coletar.py` gera o mapa de qualquer outro tema.
+Para rodar à mão, basta ter Python 3 e executar `python3 coletar.py bruto.json`, depois `python3 analisar.py bruto.json pasta_de_saida` e, se quiser registrar na série, `python3 serie.py pasta_de_saida .`. Trocar as sementes no começo de `coletar.py` gera o mapa de qualquer outro tema.
 
 <style>
   .barras { list-style: none; padding: 0; margin: 1rem 0; }

@@ -51,23 +51,28 @@ SEMENTES = [
 
 cache = {}
 consultas = 0
+falhas = 0
 
 
 def sugerir(q):
-    global consultas
+    global consultas, falhas
     if q in cache:
         return cache[q]
     url = URL.format(q=urllib.parse.quote(q))
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (pesquisa-autoral)"})
+    lista = []
+    ok = False
     for tentativa in range(3):
         try:
             with urllib.request.urlopen(req, timeout=15) as r:
                 dados = json.loads(r.read().decode("utf-8"))
             lista = [s.strip() for s in dados[1]]
+            ok = True
             break
         except Exception:
             time.sleep(2 * (tentativa + 1))
-            lista = []
+    if not ok:
+        falhas += 1
     cache[q] = lista
     consultas += 1
     time.sleep(INTERVALO)
@@ -115,6 +120,10 @@ def main(saida):
         for tema in list(v["temas"]):
             registrar(termo, tema, 3)
 
+    if consultas == 0 or falhas > 0.2 * consultas:
+        print(f"Coleta abortada: {falhas} falhas em {consultas} consultas.", file=sys.stderr)
+        sys.exit(1)
+
     saida_dados = []
     for termo, v in reg.items():
         saida_dados.append({
@@ -128,6 +137,7 @@ def main(saida):
         json.dump({
             "coletado_em": time.strftime("%Y-%m-%d"),
             "total_consultas": consultas,
+            "consultas_com_falha": falhas,
             "sementes": SEMENTES,
             "sugestoes": saida_dados,
         }, f, ensure_ascii=False, indent=1)
