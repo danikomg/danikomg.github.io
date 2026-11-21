@@ -1,0 +1,48 @@
+name: Coleta mensal de territórios
+
+# Roda sozinho no dia 1 de cada mês e também pode ser disparado à mão
+# (aba Actions > Coleta mensal de territórios > Run workflow).
+on:
+  schedule:
+    - cron: "17 9 1 * *"
+  workflow_dispatch:
+
+# Permite que o fluxo grave os arquivos novos no próprio repositório.
+permissions:
+  contents: write
+
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: Preparar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Coletar sugestões do autocomplete
+        run: python assets/territorios/coletar.py "$RUNNER_TEMP/bruto.json"
+
+      - name: Limpar e classificar
+        run: |
+          mkdir -p "$RUNNER_TEMP/analise"
+          python assets/territorios/analisar.py "$RUNNER_TEMP/bruto.json" "$RUNNER_TEMP/analise"
+
+      - name: Registrar na série histórica
+        run: python assets/territorios/serie.py "$RUNNER_TEMP/analise" .
+
+      - name: Salvar no repositório
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nada mudou."
+          else
+            git commit -m "Coleta mensal de territórios ($(date -u +%F))"
+            git push
+          fi
