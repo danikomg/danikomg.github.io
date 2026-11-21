@@ -1,0 +1,83 @@
+<!--
+  Seção "Como eu trabalho" para o portfólio (Jekyll, tema minimal).
+  Uso: salve como _includes/como-eu-trabalho.html e chame na home ou na página Sobre com:
+  {% include como-eu-trabalho.html %}
+  Todo o CSS está escopado em .perfil para não mexer no resto do site.
+-->
+
+<section class="perfil">
+  <h2>Como eu trabalho</h2>
+
+  <p>
+    Fiz uma avaliação de perfil comportamental em novembro de 2026 e o resultado foi
+    <strong>Analista Planejador</strong>. Na prática, isso descreve bem como eu gosto de trabalhar:
+    organizo o processo antes de executar, documento o que construo e só considero uma entrega
+    pronta quando consigo explicar como ela funciona. É a forma de trabalhar por trás dos
+    projetos de conteúdo, estratégia e automação da minha trajetória em marketing.
+  </p>
+
+  <div class="perfil-barra" role="img"
+       aria-label="Distribuição do perfil: Executor 16%, Comunicador 15%, Planejador 34%, Analista 35%">
+    <span style="width:16.27%; background:#c8203a;"></span>
+    <span style="width:15.06%; background:#f5b400;"></span>
+    <span style="width:33.73%; background:#12a150;"></span>
+    <span style="width:34.94%; background:#2455e6;"></span>
+  </div>
+  <ul class="perfil-legenda">
+    <li><i style="background:#c8203a"></i>Executor 16%</li>
+    <li><i style="background:#f5b400"></i>Comunicador 15%</li>
+    <li><i style="background:#12a150"></i>Planejador 34%</li>
+    <li><i style="background:#2455e6"></i>Analista 35%</li>
+  </ul>
+
+  <h3>Onde isso aparece no meu trabalho</h3>
+  <ul class="perfil-competencias">
+    <li>
+      <div class="rotulo"><strong>Planejamento</strong><small>muito alto</small></div>
+      <div class="trilho"><span style="width:87%"></span></div>
+      <p>Projetos de automação e conteúdo começam por um mapa do processo, e cada sprint, por prioridades claras.</p>
+    </li>
+    <li>
+      <div class="rotulo"><strong>Empatia e escuta</strong><small>muito alto</small></div>
+      <div class="trilho"><span style="width:87%"></span></div>
+      <p>Escrevo para advogados e profissionais do direito partindo da dor real deles, não de um texto genérico.</p>
+    </li>
+    <li>
+      <div class="rotulo"><strong>Detalhismo</strong><small>alto</small></div>
+      <div class="trilho"><span style="width:75%"></span></div>
+      <p>Revisão de estrutura, títulos e metadados em escala, com checagem para evitar conteúdos concorrentes entre si.</p>
+    </li>
+    <li>
+      <div class="rotulo"><strong>Perfil técnico</strong><small>alto</small></div>
+      <div class="trilho"><span style="width:75%"></span></div>
+      <p>Conforto com dados, APIs e automação, sem perder o olhar de conteúdo.</p>
+    </li>
+    <li>
+      <div class="rotulo"><strong>Organização e concentração</strong><small>alto</small></div>
+      <div class="trilho"><span style="width:75%"></span></div>
+      <p>Projetos longos entregues em etapas, com documentação que outra pessoa consegue seguir.</p>
+    </li>
+  </ul>
+
+  <p class="perfil-nota">
+    Avaliação feita na plataforma Sólides. Os textos acima são minha leitura do resultado,
+    ligada ao que costumo entregar. O relatório completo está disponível sob solicitação.
+  </p>
+</section>
+
+<style>
+  .perfil { margin: 2.5rem 0; }
+  .perfil-barra { display: flex; height: 14px; border-radius: 7px; overflow: hidden; margin: 1.2rem 0 .6rem; }
+  .perfil-barra span { display: block; height: 100%; }
+  .perfil-legenda { list-style: none; padding: 0; margin: 0 0 1.5rem; display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; font-size: .9rem; }
+  .perfil-legenda li { display: flex; align-items: center; gap: .4rem; }
+  .perfil-legenda i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .perfil-competencias { list-style: none; padding: 0; margin: 0; }
+  .perfil-competencias li { margin-bottom: 1.2rem; }
+  .perfil-competencias .rotulo { display: flex; justify-content: space-between; align-items: baseline; }
+  .perfil-competencias small { color: #6b5b95; text-transform: uppercase; letter-spacing: .04em; font-size: .72rem; }
+  .perfil-competencias .trilho { height: 8px; background: #eee9f5; border-radius: 4px; margin: .35rem 0 .45rem; }
+  .perfil-competencias .trilho span { display: block; height: 100%; background: #5b2a86; border-radius: 4px; }
+  .perfil-competencias p { margin: 0; font-size: .92rem; }
+  .perfil-nota { font-size: .85rem; color: #666; border-top: 1px solid #e5e5e5; padding-top: .8rem; }
+</style>
