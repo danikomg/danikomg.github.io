@@ -1,0 +1,761 @@
+{
+ "coletado_em": "2026-11-21",
+ "total_consultas": 320,
+ "sementes": [
+  "marketing de conteúdo",
+  "estratégia de conteúdo",
+  "calendário editorial",
+  "pauta de conteúdo",
+  "seo para blog",
+  "copywriting",
+  "storytelling",
+  "newsletter",
+  "e-mail marketing",
+  "inbound marketing",
+  "funil de conteúdo",
+  "jornada do cliente",
+  "persona",
+  "conteúdo para linkedin",
+  "conteúdo b2b",
+  "roteiro de vídeo",
+  "reaproveitar conteúdo",
+  "métricas de conteúdo",
+  "inteligência artificial para conteúdo",
+  "redação publicitária"
+ ],
+ "sugestoes_brutas": 1364,
+ "sugestoes_apos_unir_variantes": 1265,
+ "descartados": {
+  "inglês": 114,
+  "fora do tema ou ruído": 144
+ },
+ "termos_finais": 1007,
+ "por_intencao": [
+  [
+   "Subtema ou variação",
+   261
+  ],
+  [
+   "Materiais prontos",
+   225
+  ],
+  [
+   "Canal e formato",
+   159
+  ],
+  [
+   "Formação e cursos",
+   124
+  ],
+  [
+   "Definição e conceito",
+   83
+  ],
+  [
+   "Ferramentas e IA",
+   42
+  ],
+  [
+   "Exemplos e referências",
+   40
+  ],
+  [
+   "Como fazer",
+   37
+  ],
+  [
+   "Tendências e dados",
+   25
+  ],
+  [
+   "Contratação e preço",
+   11
+  ]
+ ],
+ "por_tema": [
+  [
+   "storytelling",
+   148
+  ],
+  [
+   "copywriting",
+   126
+  ],
+  [
+   "newsletter",
+   91
+  ],
+  [
+   "inbound marketing",
+   83
+  ],
+  [
+   "e-mail marketing",
+   71
+  ],
+  [
+   "calendário editorial",
+   65
+  ],
+  [
+   "jornada do cliente",
+   60
+  ],
+  [
+   "seo para blog",
+   50
+  ],
+  [
+   "roteiro de vídeo",
+   47
+  ],
+  [
+   "redação publicitária",
+   47
+  ],
+  [
+   "marketing de conteúdo",
+   44
+  ],
+  [
+   "estratégia de conteúdo",
+   38
+  ],
+  [
+   "conteúdo para linkedin",
+   36
+  ],
+  [
+   "funil de conteúdo",
+   34
+  ],
+  [
+   "reaproveitar conteúdo",
+   21
+  ],
+  [
+   "inteligência artificial para conteúdo",
+   18
+  ],
+  [
+   "persona",
+   15
+  ],
+  [
+   "pauta de conteúdo",
+   5
+  ],
+  [
+   "conteúdo b2b",
+   5
+  ],
+  [
+   "métricas de conteúdo",
+   3
+  ]
+ ],
+ "por_faixa": [
+  [
+   "cauda",
+   604
+  ],
+  [
+   "adjacente",
+   302
+  ],
+  [
+   "núcleo",
+   101
+  ]
+ ],
+ "canais": [
+  [
+   "E-mail",
+   136
+  ],
+  [
+   "LinkedIn",
+   52
+  ],
+  [
+   "Blog",
+   46
+  ],
+  [
+   "Redes sociais (geral)",
+   40
+  ],
+  [
+   "Instagram",
+   21
+  ],
+  [
+   "YouTube",
+   7
+  ],
+  [
+   "TikTok",
+   1
+  ],
+  [
+   "WhatsApp",
+   1
+  ]
+ ],
+ "ferramentas_marcas": [
+  [
+   "HubSpot",
+   41
+  ],
+  [
+   "Claude",
+   18
+  ],
+  [
+   "Rock Content",
+   16
+  ],
+  [
+   "Excel",
+   9
+  ],
+  [
+   "Notion",
+   5
+  ],
+  [
+   "Canva",
+   4
+  ],
+  [
+   "RD Station",
+   4
+  ],
+  [
+   "Trello",
+   3
+  ],
+  [
+   "ChatGPT",
+   2
+  ]
+ ],
+ "modificadores": [
+  [
+   "curso",
+   78
+  ],
+  [
+   "pdf",
+   75
+  ],
+  [
+   "livro",
+   54
+  ],
+  [
+   "exemplos",
+   46
+  ],
+  [
+   "hubspot",
+   41
+  ],
+  [
+   "email",
+   38
+  ],
+  [
+   "gratuito",
+   31
+  ],
+  [
+   "dados",
+   29
+  ],
+  [
+   "digital",
+   26
+  ],
+  [
+   "mail",
+   26
+  ],
+  [
+   "social",
+   24
+  ],
+  [
+   "significado",
+   23
+  ],
+  [
+   "academy",
+   22
+  ],
+  [
+   "media",
+   22
+  ],
+  [
+   "modelo",
+   22
+  ],
+  [
+   "content",
+   21
+  ],
+  [
+   "instagram",
+   21
+  ],
+  [
+   "data",
+   21
+  ],
+  [
+   "aproveitar",
+   21
+  ],
+  [
+   "redes",
+   20
+  ],
+  [
+   "skill",
+   20
+  ],
+  [
+   "with",
+   19
+  ],
+  [
+   "sociais",
+   18
+  ],
+  [
+   "claude",
+   18
+  ],
+  [
+   "gratis",
+   18
+  ],
+  [
+   "rock",
+   17
+  ],
+  [
+   "template",
+   17
+  ],
+  [
+   "outbound",
+   17
+  ],
+  [
+   "fazer",
+   16
+  ],
+  [
+   "post",
+   16
+  ]
+ ],
+ "matriz_tema_intencao": {
+  "marketing de conteúdo": {
+   "Subtema ou variação": 9,
+   "Formação e cursos": 21,
+   "Exemplos e referências": 2,
+   "Ferramentas e IA": 1,
+   "Materiais prontos": 8,
+   "Definição e conceito": 1,
+   "Contratação e preço": 2
+  },
+  "estratégia de conteúdo": {
+   "Canal e formato": 5,
+   "Formação e cursos": 6,
+   "Subtema ou variação": 20,
+   "Materiais prontos": 6,
+   "Contratação e preço": 1
+  },
+  "calendário editorial": {
+   "Tendências e dados": 12,
+   "Canal e formato": 6,
+   "Materiais prontos": 35,
+   "Subtema ou variação": 9,
+   "Definição e conceito": 1,
+   "Como fazer": 1,
+   "Exemplos e referências": 1
+  },
+  "pauta de conteúdo": {
+   "Canal e formato": 2,
+   "Subtema ou variação": 2,
+   "Como fazer": 1
+  },
+  "seo para blog": {
+   "Canal e formato": 41,
+   "Materiais prontos": 3,
+   "Subtema ou variação": 5,
+   "Ferramentas e IA": 1
+  },
+  "copywriting": {
+   "Definição e conceito": 15,
+   "Formação e cursos": 20,
+   "Ferramentas e IA": 22,
+   "Materiais prontos": 22,
+   "Exemplos e referências": 6,
+   "Subtema ou variação": 40,
+   "Canal e formato": 1
+  },
+  "storytelling": {
+   "Tendências e dados": 11,
+   "Definição e conceito": 28,
+   "Materiais prontos": 45,
+   "Exemplos e referências": 16,
+   "Subtema ou variação": 26,
+   "Formação e cursos": 19,
+   "Como fazer": 1,
+   "Contratação e preço": 1,
+   "Canal e formato": 1
+  },
+  "newsletter": {
+   "Canal e formato": 53,
+   "Definição e conceito": 17,
+   "Exemplos e referências": 3,
+   "Materiais prontos": 14,
+   "Contratação e preço": 1,
+   "Tendências e dados": 1,
+   "Ferramentas e IA": 1,
+   "Como fazer": 1
+  },
+  "e-mail marketing": {
+   "Materiais prontos": 31,
+   "Exemplos e referências": 4,
+   "Canal e formato": 16,
+   "Subtema ou variação": 12,
+   "Como fazer": 5,
+   "Formação e cursos": 1,
+   "Definição e conceito": 1,
+   "Contratação e preço": 1
+  },
+  "inbound marketing": {
+   "Definição e conceito": 14,
+   "Subtema ou variação": 25,
+   "Exemplos e referências": 3,
+   "Formação e cursos": 33,
+   "Materiais prontos": 5,
+   "Tendências e dados": 1,
+   "Contratação e preço": 2
+  },
+  "funil de conteúdo": {
+   "Canal e formato": 12,
+   "Subtema ou variação": 20,
+   "Definição e conceito": 1,
+   "Exemplos e referências": 1
+  },
+  "jornada do cliente": {
+   "Subtema ou variação": 41,
+   "Formação e cursos": 7,
+   "Materiais prontos": 5,
+   "Como fazer": 4,
+   "Definição e conceito": 2,
+   "Exemplos e referências": 1
+  },
+  "persona": {
+   "Subtema ou variação": 14,
+   "Definição e conceito": 1
+  },
+  "conteúdo para linkedin": {
+   "Contratação e preço": 3,
+   "Canal e formato": 17,
+   "Como fazer": 2,
+   "Definição e conceito": 1,
+   "Formação e cursos": 5,
+   "Exemplos e referências": 1,
+   "Materiais prontos": 7
+  },
+  "conteúdo b2b": {
+   "Subtema ou variação": 4,
+   "Materiais prontos": 1
+  },
+  "roteiro de vídeo": {
+   "Subtema ou variação": 14,
+   "Materiais prontos": 20,
+   "Formação e cursos": 5,
+   "Canal e formato": 5,
+   "Como fazer": 1,
+   "Ferramentas e IA": 1,
+   "Exemplos e referências": 1
+  },
+  "reaproveitar conteúdo": {
+   "Subtema ou variação": 1,
+   "Como fazer": 20
+  },
+  "métricas de conteúdo": {
+   "Subtema ou variação": 3
+  },
+  "inteligência artificial para conteúdo": {
+   "Ferramentas e IA": 16,
+   "Materiais prontos": 2
+  },
+  "redação publicitária": {
+   "Formação e cursos": 7,
+   "Materiais prontos": 21,
+   "Exemplos e referências": 1,
+   "Subtema ou variação": 16,
+   "Definição e conceito": 1,
+   "Como fazer": 1
+  }
+ },
+ "exemplos_por_intencao": {
+  "Materiais prontos": [
+   "redação publicitaria pdf",
+   "marketing de conteudo b2b livro",
+   "redação publicitária a prática na prática pdf",
+   "calendario editorial notion",
+   "calendario editorial trello",
+   "marketing de conteúdo pdf"
+  ],
+  "Subtema ou variação": [
+   "métricas de conteúdo",
+   "métricas de marketing de conteudo",
+   "funil de conteúdo marketing",
+   "inbound marketing em português",
+   "marketing de conteúdo b2b",
+   "funil de conteúdo invisível"
+  ],
+  "Formação e cursos": [
+   "redação publicitaria curso",
+   "marketing de conteúdo rock content curso",
+   "redação publicitaria senac",
+   "inbound marketing curso gratuito",
+   "marketing de conteúdo curso gratuito",
+   "marketing de conteúdo rock university"
+  ],
+  "Ferramentas e IA": [
+   "inteligência artificial para criar conteudo",
+   "inteligencia artificial para criar conteudo instagram",
+   "inteligencia artificial para conteudo",
+   "inteligencia artificial para produção de conteudo",
+   "inteligência artificial conteudo",
+   "copywriting skill claude"
+  ],
+  "Canal e formato": [
+   "estratégia de conteúdo para redes sociais",
+   "funil de conteúdo redes sociais",
+   "estratégia de conteúdo para instagram",
+   "criação de conteudo para linkedin",
+   "conteúdo para linkedin",
+   "estratégia de conteúdo social media"
+  ],
+  "Definição e conceito": [
+   "newsletter significado em português",
+   "tipos de conteúdo para linkedin",
+   "inbound marketing significado",
+   "copywriting o que é",
+   "storytelling o que é",
+   "newsletter o que é"
+  ],
+  "Como fazer": [
+   "como criar conteudo para linkedin",
+   "pauta de conteúdo redes sociais como fazer",
+   "storytelling como fazer",
+   "e mail marketing como fazer",
+   "jornada do cliente como fazer",
+   "email marketing locaweb como usar"
+  ],
+  "Exemplos e referências": [
+   "marketing de conteúdo exemplos",
+   "ideias de conteudo para linkedin",
+   "e-mail marketing exemplos",
+   "storytelling exemplos de histórias",
+   "inbound marketing exemplos",
+   "newsletter linkedin exemplos"
+  ],
+  "Tendências e dados": [
+   "calendario editorial social media 2026",
+   "storytelling com dados",
+   "calendário editorial 2026",
+   "calendario editorial 2025",
+   "calendario editorial julho 2026",
+   "storytelling com dados vamos praticar"
+  ],
+  "Contratação e preço": [
+   "conteúdo para linkedin empresas",
+   "marketing de conteúdo exemplos de empresas",
+   "email marketing exemplos de empresas",
+   "inbound marketing exemplos de empresas",
+   "storytelling exemplos empresas",
+   "ideias de posts para linkedin empresa"
+  ]
+ },
+ "exemplos_por_tema": {
+  "redação publicitária": [
+   "redação publicitaria pdf",
+   "redação publicitaria curso",
+   "redação publicitaria senac",
+   "redação publicitária a prática na prática pdf",
+   "redação publicitária curso gratuito"
+  ],
+  "métricas de conteúdo": [
+   "métricas de conteúdo",
+   "métricas de marketing de conteudo",
+   "metrica de conta"
+  ],
+  "conteúdo b2b": [
+   "marketing de conteudo b2b livro",
+   "marketing de conteúdo b2b",
+   "conteudo b2b",
+   "marketing b2b livros",
+   "conteudo b2c"
+  ],
+  "inteligência artificial para conteúdo": [
+   "inteligência artificial para criar conteudo",
+   "inteligencia artificial para criar conteudo instagram",
+   "inteligencia artificial para conteudo",
+   "inteligencia artificial para produção de conteudo",
+   "inteligência artificial conteudo"
+  ],
+  "marketing de conteúdo": [
+   "marketing de conteúdo rock content curso",
+   "marketing de conteúdo curso gratuito",
+   "marketing de conteúdo pdf",
+   "marketing de conteudo épico pdf",
+   "marketing de conteúdo rock university"
+  ],
+  "estratégia de conteúdo": [
+   "estratégia de conteúdo para redes sociais",
+   "estratégia de conteúdo para instagram",
+   "estratégia de conteúdo social media",
+   "estratégia de conteúdo rejane toigo",
+   "estratégia de conteúdo pdf"
+  ],
+  "inbound marketing": [
+   "inbound marketing curso gratuito",
+   "inbound marketing em português",
+   "inbound marketing curso grátis",
+   "inbound marketing significado",
+   "inbound marketing hubspot academy"
+  ],
+  "funil de conteúdo": [
+   "funil de conteúdo redes sociais",
+   "funil de conteúdo marketing",
+   "funil de conteúdo invisível",
+   "funil de criação de conteudo",
+   "funil de conteúdo instagram"
+  ],
+  "calendário editorial": [
+   "calendario editorial notion",
+   "calendario editorial trello",
+   "calendario editorial excel",
+   "calendário editorial social media gratuito",
+   "calendário editorial redes sociais download"
+  ],
+  "newsletter": [
+   "newsletter significado em português",
+   "newsletter o que é",
+   "newsletter zalando kod",
+   "newsletter linkedin exemplos",
+   "newsletter significado"
+  ],
+  "jornada do cliente": [
+   "jornada do cliente pdf",
+   "jornada do cliente em inglês",
+   "jornada do cliente e funil de vendas",
+   "jornada do cliente e experiência do cliente",
+   "jornada do cliente marketing"
+  ],
+  "conteúdo para linkedin": [
+   "criação de conteudo para linkedin",
+   "conteúdo para linkedin",
+   "conteudo para postar no linkedin",
+   "como criar conteudo para linkedin",
+   "tipos de conteúdo para linkedin"
+  ],
+  "pauta de conteúdo": [
+   "pauta de conteúdo redes sociais como fazer",
+   "pauta de conteúdo redes sociais",
+   "pauta de conteudo",
+   "pauta de conteúdos",
+   "pauta de redes sociais"
+  ],
+  "copywriting": [
+   "copywriting simbolo",
+   "copywriting skillshare",
+   "copywriting skill claude",
+   "copywriting curso gratuito",
+   "copywriting o que é"
+  ],
+  "seo para blog": [
+   "blog post seo",
+   "seo blogging",
+   "seo blog google",
+   "seo blog post",
+   "seo blogs"
+  ],
+  "roteiro de vídeo": [
+   "roteiro de vídeo pronto",
+   "roteiro de vídeo para youtube pronto",
+   "roteiro de vídeo aula",
+   "roteiro de vídeo pdf",
+   "roteiro de vídeo institucional pdf"
+  ],
+  "storytelling": [
+   "storytelling com dados livro",
+   "storytelling curso gratuito",
+   "storytelling com dados",
+   "storytelling o que é",
+   "storytelling livro"
+  ],
+  "e-mail marketing": [
+   "e-mail marketing gratuito",
+   "e-mail marketing exemplos",
+   "e-mail marketing modelos",
+   "e-mail marketing tamanho",
+   "como fazer e mail marketing gratuito"
+  ],
+  "reaproveitar conteúdo": [
+   "aproveitar com",
+   "aproveitar como se escreve",
+   "como aproveitar banana madura",
+   "como aproveitar",
+   "como aproveitar sobras de arroz"
+  ],
+  "persona": [
+   "personare",
+   "personal",
+   "personagens do folclore",
+   "personagens gta 6",
+   "personal trainer"
+  ]
+ },
+ "nucleo_top25": [
+  "redação publicitaria pdf",
+  "métricas de conteúdo",
+  "redação publicitaria curso",
+  "marketing de conteudo b2b livro",
+  "métricas de marketing de conteudo",
+  "inteligência artificial para criar conteudo",
+  "marketing de conteúdo rock content curso",
+  "estratégia de conteúdo para redes sociais",
+  "inteligencia artificial para criar conteudo instagram",
+  "redação publicitaria senac",
+  "inteligencia artificial para conteudo",
+  "inbound marketing curso gratuito",
+  "marketing de conteúdo curso gratuito",
+  "redação publicitária a prática na prática pdf",
+  "funil de conteúdo redes sociais",
+  "inteligencia artificial para produção de conteudo",
+  "funil de conteúdo marketing",
+  "calendario editorial notion",
+  "calendario editorial trello",
+  "newsletter significado em português",
+  "marketing de conteúdo pdf",
+  "calendario editorial excel",
+  "marketing de conteudo épico pdf",
+  "jornada do cliente pdf",
+  "marketing de conteúdo rock university"
+ ],
+ "pontes": []
+}
